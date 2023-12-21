@@ -18,7 +18,6 @@ df.columns = [
 
 print(df)
 
-
 #الف)
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
@@ -46,32 +45,29 @@ for feature in features:
 
 #ب)
 
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-import matplotlib.pyplot as plt
-import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import train_test_split
 
-# فرض می‌کنیم 'df' DataFrame شما و 'y' متغیر هدف شما است
-target = 'Class variable (0 or 1)'
+# Load the dataset
+df = pd.read_csv('pima-indians-diabetes.csv')
 
-# حذف نمونه‌هایی که دارای مقدار صفر هستند
-df = df.replace(0, np.nan)
-df = df.dropna()
+# Drop columns with zero values
+df = df.loc[:, (df != 0).any(axis=0)]
 
-# تعیین ویژگی‌ها و هدف
-X = df.drop(target, axis=1)
-y = df[target]
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(df.iloc[:, :-1], df.iloc[:, -1], test_size=0.2, random_state=42)
 
-# تعداد کلاس‌ها و ویژگی‌ها را محاسبه می‌کنیم
-n_classes = len(np.unique(y))
-n_features = X.shape[1]
+# Apply LDA
+lda = LinearDiscriminantAnalysis()
+lda.fit(X_train, y_train)
+X_train_lda = lda.transform(X_train)
+X_test_lda = lda.transform(X_test)
 
-# اعمال LDA
-n_components = min(n_features, n_classes - 1)
-lda = LDA(n_components=n_components)
-X_lda = lda.fit_transform(X, y)
-
-# رسم نمودار
-plt.scatter(X_lda, y)
-plt.xlabel('LDA1')
-plt.ylabel(target)
+# Plot the scatter plot
+plt.scatter(X_train_lda[:, 0], X_train_lda[:, 0], c=y_train, cmap='rainbow')
+plt.xlabel('LD1')
+plt.ylabel('LD2')
+plt.title('LDA Scatter Plot')
 plt.show()
